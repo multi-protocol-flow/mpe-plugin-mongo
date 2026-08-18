@@ -42,6 +42,14 @@ fn connect_config(uri: &str, db: &str) -> Value {
     json!({ "type": "mongo:connect", "uri": uri, "database": db, "timeout_ms": 10_000 })
 }
 
+/// connect 请求参数：宿主每次 execute 都带 `node_instance_id`（节点实例
+/// uuid），connect 节点以 `(execution_id, node_instance_id)` 为池 key 注册
+/// 连接；操作节点的 `connection_uuid` 必须指向该实例 id（宿主经 schema 的
+/// `x-node-selector` 注入，见 src/lib.rs）。
+fn connect_params(exec: &str, instance: &str, uri: &str, db: &str) -> Value {
+    json!({ "execution_id": exec, "node_instance_id": instance, "config": connect_config(uri, db) })
+}
+
 // ---------------------------------------------------------------------------
 // stdio 驱动（插件进程）
 // ---------------------------------------------------------------------------
@@ -280,7 +288,7 @@ async fn connect_insert_find_roundtrip() {
 
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-a", "config": connect_config(&uri, &db) }),
+        connect_params("exec-a", "conn-1", &uri, &db),
     );
     let out = output(&resp);
     assert_eq!(out["connected"].as_bool(), Some(true));
@@ -292,6 +300,7 @@ async fn connect_insert_find_roundtrip() {
             "execution_id": "exec-a",
             "config": json!({
                 "type": "mongo:insert",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "documents": r#"[{"name":"a"},{"name":"b"},{"name":"c"}]"#,
             }),
@@ -305,6 +314,7 @@ async fn connect_insert_find_roundtrip() {
             "execution_id": "exec-a",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": "{}",
                 "limit": 100,
@@ -327,6 +337,7 @@ async fn connect_insert_find_roundtrip() {
             "execution_id": "exec-a",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": "{}",
                 "limit": 2,
@@ -368,7 +379,7 @@ async fn update_one_many_upsert() {
 
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-b", "config": connect_config(&uri, &db) }),
+        connect_params("exec-b", "conn-1", &uri, &db),
     );
     assert_eq!(output(&resp)["connected"].as_bool(), Some(true));
 
@@ -379,6 +390,7 @@ async fn update_one_many_upsert() {
             "execution_id": "exec-b",
             "config": json!({
                 "type": "mongo:update",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": r#"{"group": "b"}"#,
                 "update": r#"{"$set": {"tag": "one"}}"#,
@@ -396,6 +408,7 @@ async fn update_one_many_upsert() {
             "execution_id": "exec-b",
             "config": json!({
                 "type": "mongo:update",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": r#"{"group": "b"}"#,
                 "update": r#"{"$set": {"tag": "many"}}"#,
@@ -414,6 +427,7 @@ async fn update_one_many_upsert() {
             "execution_id": "exec-b",
             "config": json!({
                 "type": "mongo:update",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": r#"{"name": "upserted"}"#,
                 "update": r#"{"$set": {"age": 99}}"#,
@@ -432,6 +446,7 @@ async fn update_one_many_upsert() {
             "execution_id": "exec-b",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": r#"{"name": "upserted"}"#,
                 "limit": 10,
@@ -467,7 +482,7 @@ async fn delete_one_then_many() {
 
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-c", "config": connect_config(&uri, &db) }),
+        connect_params("exec-c", "conn-1", &uri, &db),
     );
     assert_eq!(output(&resp)["connected"].as_bool(), Some(true));
 
@@ -477,6 +492,7 @@ async fn delete_one_then_many() {
             "execution_id": "exec-c",
             "config": json!({
                 "type": "mongo:delete",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": "{}",
                 "delete_many": false,
@@ -491,6 +507,7 @@ async fn delete_one_then_many() {
             "execution_id": "exec-c",
             "config": json!({
                 "type": "mongo:delete",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": "{}",
                 "delete_many": true,
@@ -506,6 +523,7 @@ async fn delete_one_then_many() {
             "execution_id": "exec-c",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": "{}",
                 "limit": 10,
@@ -542,7 +560,7 @@ async fn aggregate_bounded() {
 
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-d", "config": connect_config(&uri, &db) }),
+        connect_params("exec-d", "conn-1", &uri, &db),
     );
     assert_eq!(output(&resp)["connected"].as_bool(), Some(true));
 
@@ -552,6 +570,7 @@ async fn aggregate_bounded() {
             "execution_id": "exec-d",
             "config": json!({
                 "type": "mongo:aggregate",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "pipeline": r#"[{"$match": {"n": {"$gte": 2}}}]"#,
                 "limit": 2,
@@ -575,6 +594,7 @@ async fn aggregate_bounded() {
             "execution_id": "exec-d",
             "config": json!({
                 "type": "mongo:aggregate",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "pipeline": r#"[{"$count": "total"}]"#,
                 "limit": 100,
@@ -604,7 +624,7 @@ async fn execution_id_isolation() {
     // Exec A：connect + insert。
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-a", "config": connect_config(&uri, &db) }),
+        connect_params("exec-a", "conn-a", &uri, &db),
     );
     assert_eq!(output(&resp)["connected"].as_bool(), Some(true));
     let resp = plugin.request(
@@ -613,6 +633,7 @@ async fn execution_id_isolation() {
             "execution_id": "exec-a",
             "config": json!({
                 "type": "mongo:insert",
+                "connection_uuid": "conn-a",
                 "collection": "users",
                 "documents": r#"[{"name": "a"}]"#,
             }),
@@ -627,6 +648,7 @@ async fn execution_id_isolation() {
             "execution_id": "exec-b",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-b",
                 "collection": "users",
                 "filter": "{}",
                 "limit": 10,
@@ -642,6 +664,7 @@ async fn execution_id_isolation() {
             "execution_id": "exec-a",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-a",
                 "collection": "users",
                 "filter": "{}",
                 "limit": 10,
@@ -662,6 +685,7 @@ async fn execution_id_isolation() {
             "execution_id": "exec-b",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-b",
                 "collection": "users",
                 "filter": "{}",
                 "limit": 10,
@@ -685,7 +709,7 @@ async fn close_then_find_fails() {
 
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-f", "config": connect_config(&uri, &db) }),
+        connect_params("exec-f", "conn-1", &uri, &db),
     );
     assert_eq!(output(&resp)["connected"].as_bool(), Some(true));
 
@@ -701,6 +725,7 @@ async fn close_then_find_fails() {
             "execution_id": "exec-f",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": "{}",
                 "limit": 10,
@@ -712,7 +737,7 @@ async fn close_then_find_fails() {
     // 再次 connect 必须干净恢复（close 不永久失效）。
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-f", "config": connect_config(&uri, &db) }),
+        connect_params("exec-f", "conn-1", &uri, &db),
     );
     assert_eq!(output(&resp)["connected"].as_bool(), Some(true));
 
@@ -731,7 +756,7 @@ async fn flow_ended_releases_connection() {
 
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-g", "config": connect_config(&uri, &db) }),
+        connect_params("exec-g", "conn-1", &uri, &db),
     );
     assert_eq!(output(&resp)["connected"].as_bool(), Some(true));
 
@@ -744,6 +769,7 @@ async fn flow_ended_releases_connection() {
             "execution_id": "exec-g",
             "config": json!({
                 "type": "mongo:find",
+                "connection_uuid": "conn-1",
                 "collection": "users",
                 "filter": "{}",
                 "limit": 10,
@@ -755,7 +781,7 @@ async fn flow_ended_releases_connection() {
     // 下一次 execute 必须重新 connect 才能继续。
     let resp = plugin.request(
         "execute",
-        json!({ "execution_id": "exec-g", "config": connect_config(&uri, &db) }),
+        connect_params("exec-g", "conn-1", &uri, &db),
     );
     assert_eq!(output(&resp)["connected"].as_bool(), Some(true));
 
