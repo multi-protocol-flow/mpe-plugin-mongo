@@ -1,0 +1,90 @@
+{
+  "_version": 1,
+  "flow": {
+    "uuid": "flow-mongo-e2e",
+    "name": "mongo-e2e",
+    "initial_variables": {},
+    "nodes": [
+      {
+        "uuid": "entry-001",
+        "type": "entry",
+        "name": "Entry",
+        "position": { "x": 0, "y": 0 },
+        "data": { "type": "entry" }
+      },
+      {
+        "uuid": "mongo-connect-001",
+        "type": "mongo:connect",
+        "name": "Mongo Connect",
+        "position": { "x": 200, "y": 0 },
+        "data": {
+          "type": "mongo:connect",
+          "uri": "mongodb://localhost:27017",
+          "database": "mpe_e2e",
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "uuid": "mongo-insert-001",
+        "type": "mongo:insert",
+        "name": "Mongo Insert",
+        "position": { "x": 400, "y": 0 },
+        "data": {
+          "type": "mongo:insert",
+          "collection": "users",
+          "documents": "[{\"name\":\"a\"},{\"name\":\"b\"}]"
+        }
+      },
+      {
+        "uuid": "mongo-find-001",
+        "type": "mongo:find",
+        "name": "Mongo Find",
+        "position": { "x": 600, "y": 0 },
+        "data": {
+          "type": "mongo:find",
+          "collection": "users",
+          "filter": "{}",
+          "limit": 10
+        }
+      },
+      {
+        "uuid": "end-001",
+        "type": "end",
+        "name": "End",
+        "position": { "x": 800, "y": 0 },
+        "data": { "type": "end" }
+      }
+    ],
+    "connections": [
+      {
+        "id": "conn-1",
+        "source_node_uuid": "entry-001",
+        "target_node_uuid": "mongo-connect-001",
+        "source_port_id": "out",
+        "target_port_id": "in"
+      },
+      {
+        "id": "conn-2",
+        "source_node_uuid": "mongo-connect-001",
+        "target_node_uuid": "mongo-insert-001",
+        "source_port_id": "out",
+        "target_port_id": "in"
+      },
+      {
+        "id": "conn-3",
+        "source_node_uuid": "mongo-insert-001",
+        "target_node_uuid": "mongo-find-001",
+        "source_port_id": "out",
+        "target_port_id": "in"
+      },
+      {
+        "id": "conn-4",
+        "source_node_uuid": "mongo-find-001",
+        "target_node_uuid": "end-001",
+        "source_port_id": "out",
+        "target_port_id": "in"
+      }
+    ]
+  },
+  "_meta": null
+}

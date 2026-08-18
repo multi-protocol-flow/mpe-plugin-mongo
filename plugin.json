@@ -1,0 +1,13 @@
+{
+  "name": "mongo",
+  "version": "0.1.0",
+  "description": "MongoDB protocol plugin: connect/find/insert/update/delete/aggregate/close",
+  "entry": {
+    "command": "./mpe_mongo_plugin"
+  },
+  "env": {},
+  "permissions": [],
+  "capabilities": { "streaming": true },
+  "locales": ["zh-CN", "en-US"],
+  "default_locale": "en-US"
+}

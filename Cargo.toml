@@ -1,0 +1,25 @@
+[package]
+name = "mpe-plugin-mongo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Third-party development: public SDK only, never host types (flow-engine-core etc.)
+mpe-plugin-sdk = { git = "https://github.com/multi-protocol-flow/mpe-plugin-sdk.git", tag = "v0.1.0" }
+# Official MongoDB driver (async, tokio runtime — tokio-only by default
+# since 3.0; the 2.x-era `tokio-runtime` feature no longer exists)
+mongodb = { version = "3" }
+# Cursor iteration (todo-6 find): mongodb 3.8 does NOT re-export `futures`;
+# its own docs (cursor.rs) use `futures::stream::TryStreamExt` for
+# `cursor.try_next()` — driver companion crate, standard 0.3 line.
+futures = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+
+[profile.release]
+opt-level = 3
+
+[[bin]]
+name = "mpe_mongo_plugin"
+path = "src/main.rs"
