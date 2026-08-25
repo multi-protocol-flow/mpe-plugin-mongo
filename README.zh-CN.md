@@ -271,9 +271,7 @@ mpe run -f flow_with_mongo.json
 
 ### 与宿主一起跑（todo-12 实测 e2e）
 
-宿主 conformance 套件（`flow-engine-plugin/tests/conformance.rs`）只驱动
-`echo_mock` 与模板插件，**不会扫描本插件**——真正驱动本插件的是宿主 CLI 的
-插件扫描（`MPE_PLUGIN_DIR`）。已实测通过的端到端步骤：
+真正驱动本插件的是宿主 CLI 的插件扫描（`MPE_PLUGIN_DIR`）。已实测通过的端到端步骤：
 
 ```bash
 # 1. 构建插件 release（产物 target/release/mpe_mongo_plugin，Linux 无 .exe）

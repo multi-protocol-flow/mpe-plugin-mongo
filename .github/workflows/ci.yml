@@ -112,6 +112,7 @@ jobs:
         with:
           files: dist/*
       - name: Trigger registry sync
+        if: env.GH_TOKEN != ''
         env:
           GH_TOKEN: ${{ secrets.MPE_REGISTRY_TOKEN }}
         run: gh workflow run sync.yml --repo multi-protocol-flow/mpe-plugin-registry --ref main
