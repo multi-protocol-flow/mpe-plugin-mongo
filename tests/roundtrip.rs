@@ -1,5 +1,5 @@
 //! Offline stdio JSON-RPC roundtrip tests against the compiled
-//! `mpe_mongo_plugin` binary — the exact transport shape the host uses:
+//! `mpe_plugin_mongo` binary — the exact transport shape the host uses:
 //! JSON-RPC 2.0 requests on stdin, LF-framed responses on stdout.
 //!
 //! Fully offline: no mongod, no network. Every `execute` case short-circuits
@@ -22,7 +22,7 @@ use std::process::{Child, ChildStdin, ChildStdout, Command, ExitStatus, Stdio};
 use serde_json::Value;
 
 /// Path to the compiled plugin binary (set by cargo for `[[bin]]` targets).
-const PLUGIN_BIN: &str = env!("CARGO_BIN_EXE_mpe_mongo_plugin");
+const PLUGIN_BIN: &str = env!("CARGO_BIN_EXE_mpe_plugin_mongo");
 
 /// The 7 node type_ids the plugin must describe.
 const EXPECTED_TYPE_IDS: [&str; 7] = [

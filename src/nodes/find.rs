@@ -25,9 +25,20 @@ const DEFAULT_LIMIT: i64 = 100;
 pub async fn execute(ctx: &mut ExecuteContext, pool: &MongoPool) -> ExecuteResult {
     let exec_id = ctx.execution_id().unwrap_or("default").to_string();
     let config = ctx.config().clone();
-    match find_core(pool, &exec_id, &config).await {
-        Ok(result) => result,
-        Err(msg) => {
+    let timeout_ms = config
+        .get("timeout_ms")
+        .and_then(serde_json::Value::as_u64)
+        .unwrap_or(5000);
+    let timeout_dur = std::time::Duration::from_millis(timeout_ms.max(100));
+
+    match tokio::time::timeout(timeout_dur, find_core(pool, &exec_id, &config)).await {
+        Ok(Ok(result)) => result,
+        Ok(Err(msg)) => {
+            ctx.log("error", &msg);
+            ExecuteResult::fail(msg)
+        }
+        Err(_) => {
+            let msg = format!("{}: {}ms", crate::i18n::t("Mongo 操作超时", "Mongo operation timed out"), timeout_ms);
             ctx.log("error", &msg);
             ExecuteResult::fail(msg)
         }

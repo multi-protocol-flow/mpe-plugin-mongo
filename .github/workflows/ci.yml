@@ -22,9 +22,9 @@ jobs:
           # 2.39): the release binary must load on older Linux hosts (e.g.
           # WSL2 Ubuntu 22.04). ubuntu-latest-built mongo binaries require
           # GLIBC_2.38/2.39 and crash at describe on glibc < 2.38 systems.
-          - { os: ubuntu-22.04, artifact_os: linux-x64,   bin: mpe_mongo_plugin }
-          - { os: windows-latest, artifact_os: windows-x64, bin: mpe_mongo_plugin.exe }
-          - { os: macos-latest, artifact_os: macos-x64,     bin: mpe_mongo_plugin }
+          - { os: ubuntu-22.04, artifact_os: linux-x64,   bin: mpe_plugin_mongo }
+          - { os: windows-latest, artifact_os: windows-x64, bin: mpe_plugin_mongo.exe }
+          - { os: macos-latest, artifact_os: macos-x64,     bin: mpe_plugin_mongo }
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable

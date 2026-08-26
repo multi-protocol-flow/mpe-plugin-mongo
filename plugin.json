@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "MongoDB protocol plugin: connect/find/insert/update/delete/aggregate/close",
   "entry": {
-    "command": "./mpe_mongo_plugin"
+    "command": "./mpe_plugin_mongo"
   },
   "env": {},
   "permissions": [],

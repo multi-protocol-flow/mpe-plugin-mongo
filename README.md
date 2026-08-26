@@ -85,7 +85,7 @@ tokio = { version = "1", features = ["full"] }
 opt-level = 3
 
 [[bin]]
-name = "mpe_mongo_plugin"
+name = "mpe_plugin_mongo"
 path = "src/main.rs"
 ```
 
@@ -104,7 +104,7 @@ path = "src/main.rs"
   "version": "0.1.0",
   "description": "MongoDB protocol plugin: connect/find/insert/update/delete/aggregate/close",
   "entry": {
-    "command": "./mpe_mongo_plugin"
+    "command": "./mpe_plugin_mongo"
   },
   "env": {},
   "permissions": [],
@@ -117,7 +117,7 @@ Key fields:
 | field | value | meaning |
 |---|---|---|
 | `name` | `mongo` | unique; keep consistent with the directory name |
-| `entry.command` | `./mpe_mongo_plugin` | plugin binary path, marketplace-contract relative form |
+| `entry.command` | `./mpe_plugin_mongo` | plugin binary path, marketplace-contract relative form |
 | `capabilities.streaming` | `true` | **required**: process stays resident, the MongoDB connection pool survives the 60s idle reaper |
 | `min_host_version` | optional | version gate; the host skips the plugin if unmet |
 
@@ -262,7 +262,7 @@ mpe_plugin_main!(MongoPlugin);
 ## 7. Development & testing
 
 > **plugin.json `entry.command`**: a relative path in marketplace-contract form,
-> `./mpe_mongo_plugin`. The current host resolves the command against its own CWD
+> `./mpe_plugin_mongo`. The current host resolves the command against its own CWD
 > (it does not chdir into the plugin directory). When developing in this
 > repository, if you want the host to launch the plugin directly, either change
 > `command` to an absolute path on your machine, or start the host from the
@@ -272,13 +272,13 @@ mpe_plugin_main!(MongoPlugin);
 # build the release binary (the host launches it via plugin.json entry.command)
 # run from the repository root (mpe-plugin-mongo)
 cargo build --release
-# artifact: target/release/mpe_mongo_plugin (Linux has no .exe suffix)
+# artifact: target/release/mpe_plugin_mongo (Linux has no .exe suffix)
 
 # offline unit tests (pool isolation, config parsing) + stdio roundtrip tests
 cargo test
 
 # manual smoke test: simulate a host conversation (describe → execute)
-echo '{"jsonrpc":"2.0","id":1,"method":"describe","params":{}}' | target/debug/mpe_mongo_plugin
+echo '{"jsonrpc":"2.0","id":1,"method":"describe","params":{}}' | target/debug/mpe_plugin_mongo
 
 # real-MongoDB integration tests (skipped by default; enable when mongod is up)
 MPE_MONGO_URI=mongodb://127.0.0.1:27017 cargo test --test integration -- --include-ignored

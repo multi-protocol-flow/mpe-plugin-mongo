@@ -33,11 +33,22 @@ const MAX_RESULT_BYTES: usize = 1_500_000;
 pub async fn execute(ctx: &mut ExecuteContext, pool: &MongoPool) -> ExecuteResult {
     let exec_id = ctx.execution_id().unwrap_or("default");
     let config = ctx.config().clone();
-    match aggregate_core(pool, exec_id, &config).await {
-        Ok(result) => result,
-        Err(message) => {
+    let timeout_ms = config
+        .get("timeout_ms")
+        .and_then(serde_json::Value::as_u64)
+        .unwrap_or(5000);
+    let timeout_dur = std::time::Duration::from_millis(timeout_ms.max(100));
+
+    match tokio::time::timeout(timeout_dur, aggregate_core(pool, exec_id, &config)).await {
+        Ok(Ok(result)) => result,
+        Ok(Err(message)) => {
             ctx.log("error", message.clone());
             ExecuteResult::fail(message)
+        }
+        Err(_) => {
+            let msg = format!("{}: {}ms", crate::i18n::t("Mongo 操作超时", "Mongo operation timed out"), timeout_ms);
+            ctx.log("error", msg.clone());
+            ExecuteResult::fail(msg)
         }
     }
 }

@@ -74,7 +74,7 @@ tokio = { version = "1", features = ["full"] }
 opt-level = 3
 
 [[bin]]
-name = "mpe_mongo_plugin"
+name = "mpe_plugin_mongo"
 path = "src/main.rs"
 ```
 
@@ -93,7 +93,7 @@ path = "src/main.rs"
   "version": "0.1.0",
   "description": "MongoDB protocol plugin: connect/find/insert/update/delete/aggregate/close",
   "entry": {
-    "command": "./mpe_mongo_plugin"
+    "command": "./mpe_plugin_mongo"
   },
   "env": {},
   "permissions": [],
@@ -246,18 +246,18 @@ mpe_plugin_main!(MongoPlugin);
 # 构建（独立于宿主 workspace）
 cd plugins/mongo
 cargo build --release
-# 产物: target/release/mpe_mongo_plugin.exe
+# 产物: target/release/mpe_plugin_mongo
 
 # 单元测试（连接池隔离、配置解析）
 cargo test
 
 # 手动冒烟：模拟宿主对话（describe → execute）
-echo '{"jsonrpc":"2.0","id":1,"method":"describe","params":{}}' | target/debug/mpe_mongo_plugin.exe
+echo '{"jsonrpc":"2.0","id":1,"method":"describe","params":{}}' | target/debug/mpe_plugin_mongo
 ```
 
 > **注意（todo-1/todo-12 实测）**：`entry.command`（plugin.json）按宿主文档
 > （docs/plugin-sdk.md:72）是相对**宿主进程 cwd** 解析，而非插件目录。
-> todo-12 起 plugin.json 已改为平台正确的相对路径 `target/release/mpe_mongo_plugin`
+> todo-12 起 plugin.json 已改为平台正确的相对路径 `./mpe_plugin_mongo`
 > （Linux 构建产物无 `.exe` 后缀），运行时需保证宿主进程 cwd 在插件目录内
 > （见下方"端到端"命令）；宿主 cwd 不可控的部署场景应改填绝对路径。
 
@@ -274,7 +274,7 @@ mpe run -f flow_with_mongo.json
 真正驱动本插件的是宿主 CLI 的插件扫描（`MPE_PLUGIN_DIR`）。已实测通过的端到端步骤：
 
 ```bash
-# 1. 构建插件 release（产物 target/release/mpe_mongo_plugin，Linux 无 .exe）
+# 1. 构建插件 release（产物 target/release/mpe_plugin_mongo，Linux 无 .exe）
 cd plugins/mongo && cargo build --release
 
 # 2. 构建纯 CLI 宿主

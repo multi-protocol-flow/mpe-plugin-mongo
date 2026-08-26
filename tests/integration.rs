@@ -1,5 +1,5 @@
 //! MongoDB 插件的 stdio 集成测试：针对真实 mongod，JSON-RPC 2.0 over piped
-//! stdio 驱动编译产物 `mpe_mongo_plugin`，与宿主走完全相同的传输通道。
+//! stdio 驱动编译产物 `mpe_plugin_mongo`，与宿主走完全相同的传输通道。
 //!
 //! 运行方式（需要 docker 中有 mongo:7）：
 //! ```bash
@@ -25,7 +25,7 @@ use mongodb::Client;
 use serde_json::{json, Value};
 
 /// 编译产物路径（cargo 为包内 `[[bin]]` 注入）。
-const PLUGIN_BIN: &str = env!("CARGO_BIN_EXE_mpe_mongo_plugin");
+const PLUGIN_BIN: &str = env!("CARGO_BIN_EXE_mpe_plugin_mongo");
 
 /// 连接串：`MPE_MONGO_URI` 可覆盖，默认本地 mongod。
 fn mongo_uri() -> String {
@@ -71,7 +71,7 @@ impl PluginProcess {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .expect("无法拉起 mpe_mongo_plugin");
+            .expect("无法拉起 mpe_plugin_mongo");
         let stdin = child.stdin.take().expect("插件 stdin 不可用");
         let stdout = child.stdout.take().expect("插件 stdout 不可用");
         PluginProcess {

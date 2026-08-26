@@ -165,6 +165,7 @@ impl Plugin for MongoPlugin {
                     "filter": null,
                     "project": null,
                     "limit": 100,
+                    "timeout_ms": 5000,
                 }),
                 serde_json::json!({
                     "connection_uuid": connection_uuid_property(),
@@ -172,6 +173,7 @@ impl Plugin for MongoPlugin {
                     "filter": { "type": "string", "format": "json", "description": i18n::t(r#"JSON 文本，例如 {"age": {"$gt": 18}}"#, r#"JSON text, e.g. {"age": {"$gt": 18}}"#) },
                     "project": { "type": "string", "format": "json", "description": i18n::t(r#"JSON 文本，例如 {"name": 1, "_id": 0}；null 表示不投影"#, r#"JSON text, e.g. {"name": 1, "_id": 0}; null means no projection"#) },
                     "limit": { "type": "integer", "description": i18n::t("返回条数上限", "Maximum documents to return") },
+                    "timeout_ms": { "type": "integer", "description": i18n::t("操作超时（毫秒）", "Operation timeout (ms)") },
                 }),
                 &["collection"],
                 operation_ports(),
@@ -186,11 +188,13 @@ impl Plugin for MongoPlugin {
                 serde_json::json!({
                     "collection": "users",
                     "documents": [],
+                    "timeout_ms": 5000,
                 }),
                 serde_json::json!({
                     "connection_uuid": connection_uuid_property(),
                     "collection": { "type": "string", "description": i18n::t("集合名", "Collection name") },
                     "documents": { "type": "string", "format": "json", "description": i18n::t(r#"JSON 文本，例如 [{"name": "Alice", "age": 30}]"#, r#"JSON text, e.g. [{"name": "Alice", "age": 30}]"#) },
+                    "timeout_ms": { "type": "integer", "description": i18n::t("操作超时（毫秒）", "Operation timeout (ms)") },
                 }),
                 &["collection"],
                 operation_ports(),
@@ -208,6 +212,7 @@ impl Plugin for MongoPlugin {
                     "update": null,
                     "upsert": false,
                     "update_many": false,
+                    "timeout_ms": 5000,
                 }),
                 serde_json::json!({
                     "connection_uuid": connection_uuid_property(),
@@ -216,6 +221,7 @@ impl Plugin for MongoPlugin {
                     "update": { "type": "string", "format": "json", "description": i18n::t(r#"JSON 文本，例如 {"$set": {"age": 31}}"#, r#"JSON text, e.g. {"$set": {"age": 31}}"#) },
                     "upsert": { "type": "boolean", "description": i18n::t("不存在匹配文档时是否插入新文档", "Insert a new document when no match is found") },
                     "update_many": { "type": "boolean", "description": i18n::t("是否更新所有匹配文档（updateMany）", "Update all matching documents (updateMany)") },
+                    "timeout_ms": { "type": "integer", "description": i18n::t("操作超时（毫秒）", "Operation timeout (ms)") },
                 }),
                 &["collection"],
                 operation_ports(),
@@ -231,12 +237,14 @@ impl Plugin for MongoPlugin {
                     "collection": "users",
                     "filter": null,
                     "delete_many": false,
+                    "timeout_ms": 5000,
                 }),
                 serde_json::json!({
                     "connection_uuid": connection_uuid_property(),
                     "collection": { "type": "string", "description": i18n::t("集合名", "Collection name") },
                     "filter": { "type": "string", "format": "json", "description": i18n::t(r#"JSON 文本，例如 {"name": "Alice"}"#, r#"JSON text, e.g. {"name": "Alice"}"#) },
                     "delete_many": { "type": "boolean", "description": i18n::t("是否删除所有匹配文档（deleteMany）", "Delete all matching documents (deleteMany)") },
+                    "timeout_ms": { "type": "integer", "description": i18n::t("操作超时（毫秒）", "Operation timeout (ms)") },
                 }),
                 &["collection"],
                 operation_ports(),
@@ -252,12 +260,14 @@ impl Plugin for MongoPlugin {
                     "collection": "users",
                     "pipeline": [],
                     "limit": 100,
+                    "timeout_ms": 5000,
                 }),
                 serde_json::json!({
                     "connection_uuid": connection_uuid_property(),
                     "collection": { "type": "string", "description": i18n::t("集合名", "Collection name") },
                     "pipeline": { "type": "string", "format": "json", "description": i18n::t(r#"JSON 文本，例如 [{"$match": {"age": {"$gt": 18}}}]"#, r#"JSON text, e.g. [{"$match": {"age": {"$gt": 18}}}]"#) },
                     "limit": { "type": "integer", "description": i18n::t("返回条数上限", "Maximum documents to return") },
+                    "timeout_ms": { "type": "integer", "description": i18n::t("操作超时（毫秒）", "Operation timeout (ms)") },
                 }),
                 &["collection"],
                 operation_ports(),
@@ -512,6 +522,7 @@ mod tests {
                 "filter": null,
                 "project": null,
                 "limit": 100,
+                "timeout_ms": 5000,
             })
         );
         assert_eq!(
@@ -522,6 +533,7 @@ mod tests {
                 "update": null,
                 "upsert": false,
                 "update_many": false,
+                "timeout_ms": 5000,
             })
         );
     }
