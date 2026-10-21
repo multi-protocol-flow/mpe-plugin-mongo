@@ -315,3 +315,7 @@ registry，插件节点类型会报 `E_VAL_UNKNOWN_NODE_TYPE`——属预期行�
 - [x] insert/update/delete/aggregate
 - [ ] 配置面板（P1 iframe / inline HTML）——非必须（配置经 describe 的 `config_schema` 提供，见决策 D8，未做自定义面板）
 - [ ] 发布 SDK 到 crates.io 后，插件切 crates.io 依赖彻底脱离宿主目录
+
+## 许可证
+
+MIT，详见 [LICENSE](./LICENSE)。

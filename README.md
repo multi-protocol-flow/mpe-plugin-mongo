@@ -321,3 +321,7 @@ types — expected behavior; verify plugin flows by the `run` report instead.
 - [x] insert/update/delete/aggregate
 - [ ] Config panel (P1 iframe / inline HTML) — not required (config is provided via `config_schema` from `describe`; custom panel not implemented)
 - [ ] Once the SDK is published to crates.io, switch the dependency to crates.io and fully detach from the host repo
+
+## License
+
+MIT — see [LICENSE](./LICENSE).

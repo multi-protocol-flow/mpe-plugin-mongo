@@ -2,6 +2,9 @@
 name = "mpe-plugin-mongo"
 version = "0.1.1"
 edition = "2021"
+description = "MongoDB sidecar plugin for MPE"
+license = "MIT"
+repository = "https://github.com/multi-protocol-flow/mpe-plugin-mongo"
 
 [dependencies]
 # Third-party development: public SDK only, never host types (flow-engine-core etc.)
